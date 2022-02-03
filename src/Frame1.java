@@ -8,6 +8,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.Color;
 import java.util.*;
+import java.awt.Toolkit;
+import javax.swing.SwingConstants;
 public class Frame1 {
 
 	private JFrame frame;
@@ -53,40 +55,47 @@ public class Frame1 {
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String rawNumbers=textField.getText();
-				String nums=RemoveCharacters(rawNumbers);
-				if(rawNumbers.length()<1||nums.equals(" ")) 
-				{
-					lblNewLabel.setText("You need to type at least one number!!!");
-					return;
-				}
-				
-				int[] numbers=Numbers(nums);
-				int[] sorted=Sort(numbers);
-			    int[] counted=Count(sorted);
-			    String[] words= {"Number: ","is winning with count of: "};
-				String endResult="";
-				if(counted.length==2) {
-					for(int i=0;i<counted.length;i++) 
-					{
-						endResult+=words[i]+counted[i]+"  ";
-					}
-					}else 
-					{
-						endResult="Equality between: ";
-						for(int i=0;i<counted.length;i++) 
-						{
-							if(i%2==0) {
-							endResult+=counted[i]+"  ";
-							}
-						}
-						endResult+="with count of :"+counted[counted.length-1];
-					}
-				lblNewLabel.setText(endResult);
+		print(rawNumbers,lblNewLabel);
 			}
 		});
 		btnNewButton.setBounds(131, 155, 165, 65);
 		frame.getContentPane().add(btnNewButton);
 		
+	}
+	private void print(String rawNumbers,JLabel lblNewLabel) 
+	{
+		String nums=RemoveCharacters(rawNumbers);
+		if(rawNumbers.length()<1||nums.equals(" ")) 
+		{
+			lblNewLabel.setText("You need to type at least one number!!!");
+			return;
+		}
+		
+		String[] numbers=Numbers(nums);
+		String[] sorted=Sort(numbers);
+	    String[] counted=Count(sorted);
+	    String[] words= {"Number: ","wins with count of: "};
+		String endResult="";
+		if(counted.length==2) {
+			for(int i=0;i<counted.length;i++) 
+			{
+				endResult+=words[i]+counted[i]+"  ";
+			}
+			}else 
+			{
+				endResult="Equality between: ";
+				for(int i=0;i<counted.length;i++) 
+				{
+					if(i%2==0&&i<counted.length-2) {
+					endResult+=counted[i]+" and ";
+					}else if(i%2==0&&i>=counted.length-2) 
+					{
+						endResult+=counted[i]+" ";
+					}
+				}
+				endResult+="with count of "+counted[counted.length-1];
+			}
+		lblNewLabel.setText("<html>"+endResult+"</html>");
 	}
 	private String RemoveCharacters(String raw) 
 	{
@@ -101,9 +110,15 @@ for(int i=0;i<raw.length();i++)
 				countSpaces=0;
 				tempString+=raw.charAt(i-1);
 			}
+		
 			countSpaces=0;
 			tempString+=raw.charAt(i);
+			if(i<raw.length()-1&&raw.charAt(i+1)=='.') 
+			{
+				countSpaces=1;
+				tempString+=raw.charAt(i+1);
 			
+			}
 		}else 
 		{
 			countSpaces++;
@@ -125,7 +140,7 @@ tempString=tm;
 }
 return tempString;
 	}
-	private int[] Numbers(String raw) 
+	private String[] Numbers(String raw) 
 	{	
 		int arraySize=1;
 	for(int i=0;i<raw.length();i++) 
@@ -137,7 +152,7 @@ return tempString;
 	
 	}	
 	int currIndex=0;
-  int[] numbers=new int[arraySize];
+  String[] numbers=new String[arraySize];
   String temp="";
   for(int i=0;i<raw.length();i++) 
   {
@@ -146,14 +161,14 @@ return tempString;
 	  }else 
 	  {
 		  
-		  numbers[currIndex]=Integer.parseInt(temp);
+		  numbers[currIndex]=temp;
 		  currIndex++;
 		  temp="";
 	  }
 		if(i==raw.length()-1) 
 		{
 			
-			numbers[currIndex]=Integer.parseInt(temp);
+			numbers[currIndex]=temp;
 			
 		}  
 
@@ -161,71 +176,74 @@ return tempString;
 
   return numbers;
 	}
-	private int[] Sort(int[] nums) 
+	private String[] Sort(String[] nums) 
 	{
-		int temp=0;
-		int[] sorted=nums;
+		String temp="";
+		
+		String[] sorted=nums;
 		for(int i=0;i<sorted.length-1;i++) 
 		{
 			for(int j=0;j<sorted.length-1;j++) 
 			{
-				int num1=nums[j];
-				int num2=nums[j+1];
-				if(num1>num2) 
+				String num1=nums[j];
+				String num2=nums[j+1];
+			
+				if(Double.parseDouble(num1)>Double.parseDouble(num2)) 
 				{
 					temp=nums[j];
 					sorted[j]=nums[j+1];
 					sorted[j+1]=temp;
 				}
+			
 			}
 		}
 		return sorted;
 	}
-	private int[] Count(int[] sort) 
+	private String[] Count(String[] sort) 
 	{
-		ArrayList<Integer> sizes=new ArrayList<>();
+		ArrayList<String> sizes=new ArrayList<>();
 		int tempSize=0;
-		int tempEl=sort[0];
+		String tempEl=sort[0];
 		for(int i=0;i<sort.length;i++) 
 		{
-			if(tempEl==sort[i]) 
+			if(tempEl.equals(sort[i])) 
 			{
 				tempSize++;
 			}else 
 			{
 				sizes.add(tempEl);
-				sizes.add(tempSize);
+				sizes.add(Integer.toString(tempSize));
 				tempSize=1;
 				tempEl=sort[i];
 			}
 			if(i==sort.length-1) 
 			{
 				sizes.add(tempEl);
-				sizes.add(tempSize);
+				sizes.add(Integer.toString(tempSize));
 			}
 		}
-		ArrayList<Integer> ends=new ArrayList<>();
+		ArrayList<String> ends=new ArrayList<>();
 		int temSize=0;
 	for(int i=0;i<sizes.size();i++) 
 	{
 		if(i%2!=0) 
 		{
-			if(sizes.get(i)==temSize) 
+			if(Double.parseDouble(sizes.get(i))==temSize) 
 			{
 				ends.add(sizes.get(i-1));
 				ends.add(sizes.get(i));
-			}else if(sizes.get(i)>temSize) 
+			}else if(Double.parseDouble(sizes.get(i))>temSize) 
 			{
 					ends.clear();
 					ends.add(sizes.get(i-1));
 					ends.add(sizes.get(i));
-				temSize=sizes.get(i);
+				temSize=Integer.parseInt(sizes.get(i));
 			}
 		}
 	}
 	
 	
-		int[] End=new int[ends.size()];
+		String[] End=new String[ends.size()];
 for(int i=0;i<End.length;i++) 
 {
 	End[i]=ends.get(i);
